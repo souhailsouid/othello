@@ -4,3 +4,8 @@
   padding: 2rem;
   text-decoration: underline;
 }
+
+.button-creation-style {
+  background-color: teal;
+  color: white;
+}

@@ -4,7 +4,7 @@ import Panel from '../../components/panel/panel'
 import './game.css'
 class Game extends Component {
   render() {
-
+    console.log(this.state)
     return (
       <Fragment>
         <h1>Othello</h1>

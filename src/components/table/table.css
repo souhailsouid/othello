@@ -10,3 +10,15 @@ td {
   padding: 0;
   margin: 0;
 }
+
+.panel-style {
+  text-align: left;
+  align-items: center;
+
+}
+
+.game-page-style {
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+}

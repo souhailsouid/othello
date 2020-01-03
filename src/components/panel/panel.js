@@ -2,6 +2,8 @@ import React, { Component } from 'react'
 import Table from '../table/table'
 import pieceBlack from "../../assets/Pieces (Black)/pieceBlack_multi10.png"
 import pieceWhite from "../../assets/Chips/chipWhite.png"
+// import { colorPiece } from '../../methods/piece'
+import *as line1 from '../../methods/tableOthello/line1/line1'
 import io from "socket.io-client";
 import './panel.css'
 class Panel extends Component {
@@ -11,9 +13,16 @@ class Panel extends Component {
       player1: 1,
       response: false,
       messages: [],
+      color: ''
 
     }
     this.sendMessage = this.sendMessage.bind(this)
+    this.handleClick = this.handleClick.bind(this)
+  }
+
+
+  handleClick() {
+    this.setState({ color: <img src={pieceBlack} alt="piece-black" /> })
   }
   componentDidMount() {
 
@@ -43,15 +52,8 @@ class Panel extends Component {
 
         <Table />
 
-        <section className="col-md-6 col-sm-12 col-xs-12 mt-5  panel-style">
-          <span>
+        <section className="col-md-2 col-sm-12 col-xs-12 mt-5  panel-style">
 
-            <img src={pieceBlack} alt="piece-black" className="piece" />
-
-            {/* <td> <img src={pieceWhite} alt="piece-white" className="piece" /></td> */}
-            {/* button */}
-            Passer
-        </span>
 
           <input type="text" placeholder="miaou" onKeyUp={this.sendMessage}></input>
           {this.state.messages.map((message) => {
