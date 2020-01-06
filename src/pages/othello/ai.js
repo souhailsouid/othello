@@ -1,5 +1,6 @@
+/* eslint-disable no-tabs */
+/* eslint-disable indent */
 export default class Ai {
-
 	constructor(game) {
 		this.game = game;
 	}
@@ -8,23 +9,23 @@ export default class Ai {
 		const history = this.game.state.history.slice();
 		const current = history[this.game.state.stepNumber];
 
-		let moves = []
+		let moves = [];
 		current.squares.forEach((element, index) => {
 			if (!element) {
-				let newBoard = this.game.flipSquares(current.squares, index, false);
+				const newBoard = this.game.flipSquares(current.squares, index, false);
 				if (newBoard) {
-					const oNumbers = newBoard.reduce((acc, current) => { return current === 'O' ? acc + 1 : acc }, 0);
-					moves.push({ 'index': index, 'number': oNumbers });
+					// eslint-disable-next-line no-shadow
+					const oNumbers = newBoard.reduce((acc, current) => (current === 'O' ? acc + 1 : acc), 0);
+					moves.push({ index, number: oNumbers });
 				}
 			}
 		});
 
-		moves = moves.sort((a, b) => { return b.number - a.number });
+		moves = moves.sort((a, b) => b.number - a.number);
 
 		if (moves.length > 0) {
 			return moves[0].index;
-		} else {
-			return null;
 		}
+		return null;
 	}
 }

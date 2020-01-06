@@ -1,13 +1,16 @@
 
-import React, { Fragment } from 'react'
-import './input.css'
+import React from 'react';
+import './input.css';
+
 const Input = (props) => {
-  const input = props
+  const input = props;
   return (
-    <Fragment>
+    // eslint-disable-next-line react/jsx-filename-extension
+    <>
       <label htmlFor="firstName" className="label-style">{input.label}</label>
       <input
-        type={props.type}
+        // eslint-disable-next-line react/destructuring-assignment
+        type={input.type}
         name={input.name}
         required
         placeholder={input.placeholder}
@@ -15,8 +18,13 @@ const Input = (props) => {
         value={input.value}
         onChange={input.onChange}
       />
-      <p className="validation-style"> <small>&nbsp;{input.validation}</small></p>
-    </Fragment>
-  )
-}
-export default Input
+      <p className="validation-style">
+        {' '}
+        <small>
+          {input.validation}
+        </small>
+      </p>
+    </>
+  );
+};
+export default Input;

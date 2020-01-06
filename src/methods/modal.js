@@ -1,7 +1,7 @@
 
 export const exitModalShow = (updateState) => {
-  updateState({ show: true })
-}
+  updateState({ show: true });
+};
 export const handleCloseModal = (updateState) => {
-  updateState({ show: false })
-}
+  updateState({ show: false });
+};
