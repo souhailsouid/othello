@@ -5,7 +5,7 @@ Front:<br/>
 Framework: React,<br/>
 Framework: react-boostrap,<br/>
 <br/>
-Back (server):<br/>
+Back (server): url suivante https://github.com/souhailsouid/othello-back<br/>
 Node.js - express.js,<br/>
 Base de donnée NoSql: MongoDB Atlas<br/>
 Authentification faite en JsonWebToken<br/>
@@ -14,17 +14,6 @@ Authentification faite en JsonWebToken<br/>
 Depuis ce repertoire veuillez tout d'abord faire npm install:
 ## 1er etape `npm install`
 Installe l'ensemble des packages requis pour le fonctionnement de l'application.
-## 2nd etape `Cote serveur
-La variable d environnement permettant de lier sa base de donnée  mongoAtlas se trouve dans  la racine du dossier server.<br/>
-Créer un fichier .env à la racine du dossier server:<br/> 
-Veuillez copier cette exemple dans votre fichier .env<br/>
-MONGODB_URI="mongodb+srv://souhail:souhail@cluster0-dryle.mongodb.net/test?retryWrites=true&w=majority"<br/>
-
-<br/>
-Vous pouvez  modifier la propriété MONGODB_URI comme ci dessous : <br/>
-MONGODB_URI="mongodb+srv://toto:souhail@cluster0-dryle.mongodb.net/test?retryWrites=true&w=majority"<br/>
-PS: Le lien doit être en provenance d'une base de donnée mangoDB atlas.
-
 
 ### `DEMARRAGE DE L'APPLICATION FRONT`
 ## `npm start`
@@ -37,6 +26,9 @@ Lance les test.<br />
 Important: 
 Pas de test disponible dans l'application.
 
+## `npm run lint``
 
-
+Lance le linter.
+### ATTENTION `Cote serveur
+Veuillez vous rendre à l'url suivante https://github.com/souhailsouid/othello-back
 
