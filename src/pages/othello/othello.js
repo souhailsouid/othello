@@ -30,7 +30,7 @@ class Othello extends Component {
     if (this.state.token) {
       setAuthToken(this.state.token);
     }
-    axios.get('http://localhost:9000/api/auth/', this.state.username, { withCredentials: true }).then((res) => console.log(res));
+    axios.get('http://localhost:5000/api/auth/', this.state.username, { withCredentials: true }).then((res) => console.log(res));
   }
 
   render() {
@@ -46,7 +46,7 @@ class Othello extends Component {
           <Button variant="success" onClick={() => handleCloseModal(this.setState.bind(this))}>
             Continuer la partie
           </Button>
-          <Button variant="danger" onClick={() => window.location = 'http://localhost:3000/home'}>
+          <Button variant="danger" onClick={() => window.location = 'http://localhost:9000/home'}>
             Quitter la partie
           </Button>
         </Modal.Footer>

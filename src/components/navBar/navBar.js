@@ -21,7 +21,7 @@ class NavBarComponent extends Component {
     if (this.state.token) {
       setAuthToken(this.state.token);
     }
-    axios.get('http://localhost:9000/api/auth/', this.state.username, { withCredentials: true }).then((res) => this.setState({ name: res.data.name }));
+    axios.get('http://localhost:5000/api/auth/', this.state.username, { withCredentials: true }).then((res) => this.setState({ name: res.data.name }));
   }
 
   render() {

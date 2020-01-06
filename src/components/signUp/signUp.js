@@ -24,7 +24,7 @@ export default () => {
         password,
         password2,
       };
-      fetch('http://localhost:9000/api/users', {
+      fetch('http://localhost:5000/api/users', {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',

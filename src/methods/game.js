@@ -14,12 +14,12 @@ export const onCreationGame = (state, updateState) => {
     name: state.title,
 
   };
-  axios.post('http://localhost:9000/api/games', elements)
+  axios.post('http://localhost:5000/api/games', elements)
     .then((data) => {
       updateState({ games: data, gameId: data.data.id, showAlertSuccess: true });
       const IdGame = data.data.id;
       updateState({ gameId: IdGame });
-      return window.location = 'http://localhost:3000/dashboard';
+      return window.location = 'http://localhost:9000/dashboard';
     }).catch((err) => updateState({ slackValidation: err.response.data.error }));
 };
 
@@ -28,12 +28,12 @@ export const onCreationGameIa = (state, updateState) => {
     name: state.title,
 
   };
-  axios.post('http://localhost:9000/api/games/ia', elements)
+  axios.post('http://localhost:5000/api/games/ia', elements)
     .then((data) => {
       updateState({ gamesIa: data, gameIdIA: data.data.id, showAlertSuccess: true });
       const IdGame = data.data.id;
       updateState({ gameId: IdGame });
-      return window.location = 'http://localhost:3000/dashboard';
+      return window.location = 'http://localhost:9000/dashboard';
     }).catch((err) => updateState({ slackValidation: err.response.data.error }));
 };
 

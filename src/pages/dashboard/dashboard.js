@@ -42,27 +42,32 @@ class Dashboard extends Component {
                         {!el.saveScorePlayer1 && !el.saveScoreIA
                           ? <span>Match pas encore commencé</span>
                           : null}
-                        {el.saveScorePlayer1 ? (
-                          <span>
-                            {' '}
-                            Scores: vous:&nbsp;
-                            {el.saveScorePlayer1}
-                            ,
-                          </span>
-                        ) : ''}
-                        {' '}
-                        &nbsp;
-                        {el.saveScoreIA ? (
-                          <span>
-                            IA:&nbsp;
-                            {el.saveScoreIA}
-                          </span>
-                        ) : ''}
+                        <p>
+                          {el.saveScorePlayer1 ? <span className="score-style">Score:</span> : ''}
+                          {el.saveScorePlayer1 ? (
+
+                            <span>
+                              {' '}
+                              vous:&nbsp;
+                              {el.saveScorePlayer1}
+
+                              ,
+                            </span>
+                          ) : ''}
+                          {' '}
+                          &nbsp;
+                          {el.saveScoreIA ? (
+                            <span>
+                              IA:&nbsp;
+                              {el.saveScoreIA}
+                            </span>
+                          ) : ''}
+                        </p>
                       </header>
                       <Card
-                        className={el.saveWinners === 'O' || el.saveWinners === 'XO'
+                        className={el.saveWinners === 'O' || el.saveWinners === 'XO' || el.saveScorePlayer1 === '0'
                           ? 'bg-danger text-white'
-                          : el.saveWinners === 'X'
+                          : el.saveWinners === 'X' || el.saveScoreIA === '0'
                             ? 'bg-success text-white '
                             : 'bg-primary text-white'}
                       >
@@ -74,9 +79,17 @@ class Dashboard extends Component {
                           {moment(el.date).format('DD-MM-YYYY')}
                         </Card.Body>
                         <Card.Footer>
-                          {el.saveWinners !== '' || el.saveWinners !== null ? el.saveWinners === 'O' ? 'Perdu' : '' || el.saveWinners === 'X' ? 'Gagner!' : '' || el.saveWinners === 'XO' ? 'Match null' : '' : ''}
-                          {el.saveWinners === 'O' || el.saveWinners === 'X' || el.saveWinners === 'XO' ? ''
+                          {el.saveWinners !== '' || el.saveWinners !== null
+                            ? el.saveWinners === 'O' ? 'Perdu' : '' || el.saveWinners === 'X'
+                              ? 'Gagner!' : '' || el.saveWinners === 'XO'
+                                ? 'Match null' : '' || el.saveScorePlayer1 === '0'
+                                  ? 'Perdu'
+                                  : '' : ''}
+                          {el.saveWinners === 'O' || el.saveWinners === 'X' || el.saveWinners === 'XO' || el.saveScorePlayer1 === '0' || el.saveScoreIA === '0'
+                            ? ''
                             : <Link to={{ pathname: `/${el._id}`, state: { fromId: true } }} className="single-player-link">{!el.saveScorePlayer1 && !el.saveScoreIA ? 'Commencer' : 'Reprendre la partie'}</Link>}
+
+
                         </Card.Footer>
                       </Card>
                     </section>

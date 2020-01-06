@@ -13,7 +13,7 @@ import './home.css';
 
 class Home extends Component {
   componentDidMount() {
-    axios.get('http://localhost:9000/api/users/').then((res) => console.log(res));
+    axios.get('http://localhost:5000/api/users/').then((res) => console.log(res));
   }
 
   render() {

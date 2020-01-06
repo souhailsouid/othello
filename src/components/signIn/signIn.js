@@ -20,7 +20,7 @@ export default () => {
         email: emailLogin,
         password: passwordLogin,
       };
-      fetch('http://localhost:9000/api/auth', {
+      fetch('http://localhost:5000/api/auth', {
         method: 'post',
         headers: {
           'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export default () => {
           return res.json(); // we only get here if there is no error
         })
         // eslint-disable-next-line no-return-assign
-        .then((res) => cookies.set('jwtSecret', res.token ? res.token : '', window.location = 'http://localhost:3000/dashboard'))
+        .then((res) => cookies.set('jwtSecret', res.token ? res.token : '', window.location = 'http://localhost:9000/dashboard'))
         .catch(() => {
           setShowErr(true);
         });

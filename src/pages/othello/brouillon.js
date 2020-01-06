@@ -1,4 +1,4 @@
-/* eslint-disable no-return-assign */
+/* eslint-disable no-unused-expressions */
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable jsx-a11y/control-has-associated-label */
 /* eslint-disable react/no-array-index-key */
@@ -22,14 +22,11 @@
 /* eslint-disable import/extensions */
 /* eslint-disable import/order */
 import React from 'react';
-import NavBarComponent from '../../components/navBar/navBar';
 import pieceBlack from '../../assets/Pieces (Black)/pieceBlack_multi10.png';
+import { Link } from 'react-router-dom';
 import pieceWhite from '../../assets/Chips/chipWhite.png';
 import { PostPositionIA, getGameIAByID } from '../../methods/fetch';
-import { exitModalShow, handleCloseModal } from '../../methods/modal';
-import Modal from 'react-bootstrap/Modal';
 import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
 import Alert from 'react-bootstrap/Alert';
 import Board from './board.js';
 import Ai from './ai.js';
@@ -51,6 +48,13 @@ export default class Game extends React.Component {
 				xWasNext: true,
 				winner: '',
 			}],
+			availableHistory: [{
+				squares: '',
+				xNumbers: '',
+				oNumbers: '',
+				xWasNext: true,
+				winner: '',
+			}],
 			stepNumber: 0,
 			xIsNext: true,
 			piecewhiteIA: true,
@@ -61,21 +65,24 @@ export default class Game extends React.Component {
 			xNumbersSaving: '',
 			oNumbersSaving: '',
 			availablePosition: '',
-			winner: '',
-			goToDashboard: '',
-			urlID: props.match.params.id,
-			show: false,
+			winner: ''
 		};
 	}
 
 	componentDidMount() {
 		// eslint-disable-next-line react/prop-types
 		const get = this.props.match.params.id;
+		const history = this.state.history.slice(0, this.state.stepNumber + 1);
 		axios.all([getGameIAByID(get), PostPositionIA(get)])
 			.then(axios.spread((gameByID, positionGame) => this.setState({
 				gameByID: gameByID.data,
 				positionGame: positionGame.data,
 				availablePosition: gameByID.data.savePositions,
+				availableHistory: history.concat([{
+					squares: gameByID.data.savePositions,
+					xNumbers: gameByID.data.saveScorePlayer1,
+					oNumbers: gameByID.data.saveScoreIA
+				}]),
 			})));
 	}
 
@@ -162,19 +169,17 @@ export default class Game extends React.Component {
 
 	handleClick(i) {
 		const history = this.state.history.slice(0, this.state.stepNumber + 1);
+
+
 		const current = history[this.state.stepNumber];
 		if (this.calculateWinner(current.xNumbers, current.oNumbers) || current.squares[i]) {
 			return;
 		}
 
-		const changedSquares = this.flipSquares(this.state.availablePosition.length !== 0
-			? this.state.availablePosition
-			: current.squares, i, this.state.xIsNext);
-
+		const changedSquares = this.flipSquares(current.squares, i, this.state.xIsNext);
 		if (changedSquares === null) {
 			return;
 		}
-
 		const xNumbers = changedSquares.reduce((acc, current) => (current === 'X' ? acc + 1 : acc), 0);
 		const oNumbers = changedSquares.reduce((acc, current) => (current === 'O' ? acc + 1 : acc), 0);
 
@@ -205,7 +210,55 @@ export default class Game extends React.Component {
 				? this.state.history[this.state.history.length - 1].oNumbers
 				: oNumbers,
 			winner: (xNumbers + oNumbers < 64) ? '' : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O'),
-			goToDashboard: 'recharge'
+
+		},
+			this.doRobotMove);
+	}
+
+	handleClickAv(i) {
+		const history = this.state.availableHistory.slice(0, this.state.stepNumber + 1);
+
+
+		const current = history[this.state.stepNumber];
+		if (this.calculateWinner(current.xNumbers, current.oNumbers) || current.squares[i]) {
+			return;
+		}
+
+		const changedSquares = this.flipSquares(current.squares, i, this.state.xIsNext);
+		if (changedSquares === null) {
+			return;
+		}
+		const xNumbers = changedSquares.reduce((acc, current) => (current === 'X' ? acc + 1 : acc), 0);
+		const oNumbers = changedSquares.reduce((acc, current) => (current === 'O' ? acc + 1 : acc), 0);
+
+		const shouldTurnColor = this.checkAvailableMoves(!this.state.xIsNext, changedSquares).length > 0
+			? !this.state.xIsNext : this.state.xIsNext;
+
+		this.setState({
+			availableHistory: history.concat([{
+				squares: changedSquares,
+				xNumbers,
+				oNumbers,
+				xWasNext: shouldTurnColor,
+				winner: (xNumbers + oNumbers < 64) ? null : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O'),
+			}]),
+			stepNumber: history.length,
+			xIsNext: shouldTurnColor,
+			notificationTour: false,
+			notificationTourIa: true,
+			xNumber: xNumbers,
+			oNumber: oNumbers,
+			savePositions: this.state.history !== 0
+				? this.state.history[this.state.history.length - 1].squares
+				: this.state.history,
+			xNumbersSaving: this.state.history !== 0
+				? this.state.history[this.state.history.length - 1].xNumbers
+				: xNumbers,
+			oNumbersSaving: this.state.history !== 0
+				? this.state.history[this.state.history.length - 1].oNumbers
+				: oNumbers,
+			winner: (xNumbers + oNumbers < 64) ? '' : (xNumbers === oNumbers) ? 'XO' : (xNumbers > oNumbers ? 'X' : 'O'),
+
 		},
 			this.doRobotMove);
 	}
@@ -246,23 +299,42 @@ export default class Game extends React.Component {
 
 
 	render() {
+		console.log(this.state);
 		const history = this.state.history.slice();
+		const availableHistory = this.state.availableHistory.slice();
 		const current = history[this.state.stepNumber];
-
-		let winner = this.calculateWinner(current.xNumbers, current.oNumbers);
+		const currentAvailable = availableHistory[this.state.stepNumber];
+		let winner = this.calculateWinner(this.state.availablePosition.length !== 0
+			? currentAvailable.xNumbers && currentAvailable.oNumbers
+			: current.xNumbers && current.oNumbers);
 
 
 		const availableMoves = this.checkAvailableMoves(
+
 			current.xWasNext, this.state.availablePosition.length !== 0
 			? this.state.availablePosition
 			: current.squares
 		);
+		// const availableMoves = this.checkAvailableMoves(
+		// 	setTimeout(() => {
+		// 		// this.state && this.state.availablePosition.length !== 0
+		// 		// ? currentAvailable.xWasNext && currentAvailable.squares
+		// 		// :
+		// 		current.squares, current.xWasNext;
+		// 	}), 2000
+		// );
 		const availableMovesOpposite = this.checkAvailableMoves(
 			!current.xWasNext, this.state.availablePosition.length !== 0
 			? this.state.availablePosition
 			: current.squares
 		);
 
+
+		// const availableMovesOpposite = this.checkAvailableMoves(
+		// 	this.state.availablePosition.length !== 0
+		// 	? currentAvailable.xWasNext  && currentAvailable.squares :
+		// 	 current.squares &&	current.xWasNext
+		// );
 		if ((availableMoves.length === 0) && (availableMovesOpposite.length === 0)) {
 			winner = current.xNumbers === current.oNumbers ? 'XO' : current.xNumbers > current.oNumbers ? 'X' : 'O';
 		}
@@ -270,194 +342,132 @@ export default class Game extends React.Component {
 		const status = winner
 			? (winner === 'XO') ? 'Match nul' : (winner === 'X' ? 'Vous êtes le vainqueur' : 'Vous avez perdu!')
 			: '';
-		const { show } = this.state;
-		const showModal = (
-			<Modal show={show} onHide={() => handleCloseModal(this.setState.bind(this))}>
-				<Modal.Header closeButton>
-					<Modal.Title>Quitter la partie ?</Modal.Title>
-				</Modal.Header>
-				<Modal.Body>Voulez vous quitter la partie ?</Modal.Body>
-				<Modal.Body>
-					La partie sera sauvegardé.
-					Vous pouriez y revenir à tout moment depuis votre tableau de bord
-				</Modal.Body>
-				<Modal.Body>En validant, vous seriez redirigé vers votre page d&apos;accueil</Modal.Body>
-				<Modal.Footer>
-					<Button variant="success" onClick={() => handleCloseModal(this.setState.bind(this))}>
-						Continuer la partie
-     </Button>
-					<Button variant="danger" onClick={() => window.location = 'http://localhost:9000/dashboard'}>
-						Quitter la partie
-     </Button>
-				</Modal.Footer>
-			</Modal>
-		);
+
 		return (
-			<div>
-				<header>
-					<NavBarComponent />
-				</header>
-				{showModal}
-				<article className="col-md-12 col-sm-12 col-xs-12">
-					<div className="mt-2 section-button-exit-game">
 
-						<button type="submit" className="button-game-exit-style" onClick={() => exitModalShow(this.setState.bind(this))}>Quitter la partie</button>
-					</div>
+			<div className="game">
+				<article className="col-md-6 col-sm-12 col-xs-12 mt-2">
+					{this.state.gameByID && this.state.availablePosition !== ''
+						? (
+							<Board
+								squares={this.state.availablePosition.length !== 0
+									? this.state.availablePosition
+									: current.squares}
+								availableMoves={availableMoves}
+								onClick={(i) => (this.state.availablePosition.length !== 0 ? this.handleClickAv(i) : this.handleClick(i))}
+							/>
+						)
+						: 'Chargement en cours...'}
 
-
-				</article>
-				<div className="game">
-
-
-					<article className="col-md-6 col-sm-12 col-xs-12 mt-2">
-						{this.state.gameByID && this.state.availablePosition !== ''
-							? (
-								<Board
-									squares={this.state.availablePosition.length !== 0
-										? this.state.availablePosition
-										: current.squares}
-									availableMoves={availableMoves}
-									onClick={(i) => this.handleClick(i)}
-								/>
-							)
-							: 'Chargement en cours...'}
-
-						<div className="game-status">
-							{status}
-							&nbsp;
+					<div className="game-status">
+						{status}
+						&nbsp;
         {winner ? <button onClick={() => this.resetGame()}>Play again</button> : ''}
-						</div>
-						<div />
-					</article>
-					<article className=" col-md-6 col-sm-12 col-xs-12 mt-3 ">
-						<section className="col-md-12 col-sm-12 col-xs-12  section-notification ">
-							{this.state.notificationTour
-								? (
-									<Alert variant={status === 'Vous avez perdu!' ? 'danger' : 'success'} onClose={() => this.setState({ alert: false, notificationTour: false })} dismissible>
-										<Alert.Heading>
-											{status}
-											{' '}
-										</Alert.Heading>
-										{status === 'Vous avez perdu!' || status === 'Vous êtes le vainqueur' || status === 'Match nul' ? ''
-											: <p>À vous !</p>}
-
-									</Alert>
-								) : (
-									<Alert variant="danger" onClose={() => this.setState({ alert: false, notificationTour: false })} dismissible>
-										<Alert.Heading>
-											{status}
-											{' '}
-										</Alert.Heading>
-
-										<p>Veuillez patientez, votre adversaire joue !</p>
-
-									</Alert>
-								)}
-						</section>
-						<section className="col-md-12 col-sm-12 col-xs-12   ">
-							<Card className="bg-dark text-white">
-								<Card.Title className="d-flex justify-content-center">
-									{' '}
-									<p className="name-game-style">Nom de la partie: </p>
-									{' '}
-									&nbsp;
-            {' '}
-									<p className="title-game">
+					</div>
+					<div />
+				</article>
+				<article className=" col-md-6 col-sm-12 col-xs-12 mt-3 ">
+					<section className="col-md-12 col-sm-12 col-xs-12  section-notification ">
+						{this.state.notificationTour
+							? (
+								<Alert variant={status === 'Vous avez perdu!' ? 'danger' : 'success'} onClose={() => this.setState({ alert: false, notificationTour: false })} dismissible>
+									<Alert.Heading>
+										{status}
 										{' '}
-										{this.state.positionGame
-											? this.state.positionGame.name
-											: this.state.positionGame}
+									</Alert.Heading>
+									{status === 'Vous avez perdu!' || status === 'Vous êtes le vainqueur' || status === 'Match nul' ? ''
+										: <p>À vous !</p>}
+
+								</Alert>
+							) : (
+								<Alert variant="danger" onClose={() => this.setState({ alert: false, notificationTour: false })} dismissible>
+									<Alert.Heading>
+										{status}
+										{' '}
+									</Alert.Heading>
+
+									<p>Veuillez patientez, votre adversaire joue !</p>
+
+								</Alert>
+							)}
+					</section>
+					<section className="col-md-12 col-sm-12 col-xs-12   ">
+						<Card className="bg-dark text-white">
+							<Card.Title className="d-flex justify-content-center">
+								{' '}
+								<p className="name-game-style">Nom de la partie: </p>
+								{' '}
+								&nbsp;
+            		{' '}
+								<p className="title-game">
+									{' '}
+									{this.state.positionGame ? this.state.positionGame.name : this.state.positionGame}
+								</p>
+							</Card.Title>
+							<Card.Title>Tableau de jeu</Card.Title>
+							<Card.Body className="d-flex">
+								<section className=" col-md-6 col-sm-12 col-xs-12 mt-2 row1-style">
+									<table>
+										<thead>
+											<tr>
+												<th />
+												<th />
+												<span>Nombre de pièces</span>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>Vous:</td>
+												<td className="border-style "><img src={pieceBlack} alt="piece-black" /></td>
+												<td className="text-position">
+													{' '}
+													{this.state.gameByID
+														? this.state.gameByID.saveScoreIA && this.state.xNumbersSaving === '' ? this.state.gameByID.saveScorePlayer1 : current.xNumbers : null}
+												</td>
+											</tr>
+											<tr>
+												<td>I.A:  </td>
+												<td><img src={pieceWhite} alt="piece-white" className="piece-white-dashboard" /></td>
+												<td className="text-position">
+													{' '}
+													{this.state.gameByID
+														? this.state.gameByID.saveScoreIA && this.state.oNumbersSaving === '' ? this.state.gameByID.saveScoreIA : current.oNumbers : null}
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</section>
+								<section className="col-md-6 col-sm-12 col-xs-12 mt-2 row2-style">
+									<span> Nombre de pièces</span>
+									<p>{current.xNumbers}</p>
+									<p>
+										{' '}
+										{current.oNumbers}
 									</p>
-								</Card.Title>
-								<Card.Title>Tableau de jeu</Card.Title>
-
-								<Card.Body className="d-flex">
-									<section className=" col-md-6 col-sm-12 col-xs-12 mt-2 row1-style">
-										<table>
-											<thead>
-												<tr>
-													<th />
-													<th />
-													<span>Nombre de pièces</span>
-												</tr>
-											</thead>
-											<tbody>
-												<tr>
-													<td>Vous:</td>
-													<td className="border-style "><img src={pieceBlack} alt="piece-black" /></td>
-													<td className="text-position">
-														{' '}
-														{this.state.gameByID
-															? this.state.gameByID.saveScoreIA && this.state.xNumbersSaving === '' ? this.state.gameByID.saveScorePlayer1 : current.xNumbers : null}
-													</td>
-												</tr>
-												<tr>
-													<td>I.A:  </td>
-													<td><img src={pieceWhite} alt="piece-white" className="piece-white-dashboard" /></td>
-													<td className="text-position">
-														{' '}
-														{this.state.gameByID
-															? this.state.gameByID.saveScoreIA && this.state.oNumbersSaving === '' ? this.state.gameByID.saveScoreIA : current.oNumbers : null}
-													</td>
-												</tr>
-											</tbody>
-										</table>
-									</section>
-
-									<section className="col-md-6 col-sm-12 col-xs-12 mt-2 row2-style">
-										<span> Nombre de pièces</span>
-										<p>{current.xNumbers}</p>
-										<p>
-											{' '}
-											{current.oNumbers}
-										</p>
-									</section>
-								</Card.Body>
+								</section>
+							</Card.Body>
+							<Card.Footer>
+							</Card.Footer>
+						</Card>
 
 
-								<Card.Footer>
-
-								</Card.Footer>
-							</Card>
-
-
-						</section>
-
-
-						<section className="col-md-12 col-sm-12 col-xs-12 mt-2 ">
-
-							{this.state.alert && status !== ''
-								? (
-									<Alert variant={status === 'Vous êtes le vainqueur' ? 'success' : 'danger'} onClose={() => this.setState({ alert: false })} dismissible>
-										<Alert.Heading>
-											{status}
-											{' '}
-										</Alert.Heading>
-										{winner
-											? (
-												<Button
-													onClick={() => this.setState({
-														savePositions: this.state.savePositions,
-														saveScorePlayer1: this.state.xNumber,
-														saveScoreIA: this.state.oNumber,
-														saveWinners: this.state.winner,
-														goToDashboard: 'tupeux'
-													})}
-													className="single-player-link"
-												>
-													Se rediriger sur la page d'accueil
-            </Button>
-											)
-											: ''}
-									</Alert>
-								)
-								: null}
-						</section>
-						{this.state.goToDashboard === 'tupeux' ? window.location = 'http://localhost:9000/dashboard' : null}
-						{/* {this.state.goToDashboard === 'recharge' ? window.location = `http://localhost:9000/${this.state.urlID}` : null} */}
-
-					</article>
-				</div>
+					</section>
+					<section className="col-md-12 col-sm-12 col-xs-12 mt-2 ">
+						{this.state.alert && status !== ''
+							? (
+								<Alert variant={status === 'Vous êtes le vainqueur' ? 'success' : 'danger'} onClose={() => this.setState({ alert: false })} dismissible>
+									<Alert.Heading>
+										{status}
+										{' '}
+									</Alert.Heading>
+									{winner
+										? <Link to="/dashboard" className="single-player-link">Se rediriger sur la page d'accueil</Link>
+										: ''}
+								</Alert>
+							)
+							: null}
+					</section>
+				</article>
 			</div>
 		);
 	}
