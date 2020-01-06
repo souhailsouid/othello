@@ -6,22 +6,34 @@ import {
 } from "react-router-dom";
 import Login from './pages/login/login'
 import Game from './pages/othello/game'
-import './app.css';
+import Home from './pages/accueil/home'
+// import Othello from './pages/othello/othello';
+import Dashboard from './pages/dashboard/dashboard'
+
+
+import './App.css';
 
 function App() {
+
   return (
     <Router>
       <div className="App">
 
 
         <Switch>
-          <Route path="/othello">
-            <Game />
-          </Route>
+          <Route exact path="/" component={Login} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/home" component={Home} />
 
-          <Route path="/">
-            <Login />
-          </Route>
+          {/* <Route path="/:id" component={Othello}/> */}
+          <Route path="/:id" component={Game} />
+
+
+
+
+
+
+
         </Switch>
 
 

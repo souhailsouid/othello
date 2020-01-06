@@ -1,5 +1,6 @@
 
 import React, { Fragment } from 'react'
+import './input.css'
 const Input = (props) => {
   const input = props
   return (
@@ -10,7 +11,7 @@ const Input = (props) => {
         name={input.name}
         required
         placeholder={input.placeholder}
-        className={input.validation ? 'form-control who-to-follow-input' : 'form-control '}
+        className={input.validation ? 'form-control error-input' : 'form-control '}
         value={input.value}
         onChange={input.onChange}
       />
